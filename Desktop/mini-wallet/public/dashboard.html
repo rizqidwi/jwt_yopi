@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Wallet - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Grid Layout - 2 kolom penuh */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        /* Card Style */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+
+        /* Balance Card - Spesial */
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .balance-card h3 {
+            color: white;
+            border-left-color: white;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .user-info {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .user-info p {
+            margin: 10px 0;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* JWT Box */
+        .jwt-box {
+            background: #1a1a2e;
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .payload-box {
+            background: #16213e;
+            color: #e94560;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* Message */
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Transaction List */
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-item.credit {
+            color: #28a745;
+        }
+
+        .transaction-item.debit {
+            color: #dc3545;
+        }
+
+        .transaction-date {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Full width row */
+        .full-width {
+            grid-column: span 2;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+            .balance-amount {
+                font-size: 32px;
+            }
+        }
+
+        /* Refresh button kecil */
+        .refresh-btn {
+            background: #6c757d;
+            margin-top: 10px;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .refresh-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>💰 Mini Wallet Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+
+    <!-- Message -->
+    <div id="message" class="message hidden"></div>
+
+    <!-- Grid 2 Kolom -->
+    <div class="grid">
+        <!-- Card 1: JWT Inspector -->
+        <div class="card">
+            <h3>🔐 JWT Inspector</h3>
+            <div class="jwt-box" id="jwtToken">Loading...</div>
+            <div class="payload-box" id="jwtPayload">Loading...</div>
+        </div>
+
+        <!-- Card 2: User Info & Balance (Full warna) -->
+        <div class="card balance-card">
+            <h3>👤 User Information</h3>
+            <div class="user-info">
+                <p>📛 <strong>Username:</strong> <span id="username">-</span></p>
+                <p>📧 <strong>Email:</strong> <span id="email">-</span></p>
+            </div>
+            <div class="balance-amount">
+                💰 Rp <span id="balance">0</span>
+            </div>
+            <button class="refresh-btn" onclick="refreshBalance()">🔄 Refresh Balance</button>
+        </div>
+
+        <!-- Card 3: Top Up -->
+        <div class="card">
+            <h3>💵 Top Up Saldo</h3>
+            <div class="form-group">
+                <label>Nominal (Rp)</label>
+                <input type="number" id="topupAmount" placeholder="Masukkan nominal" min="1000" step="1000">
+            </div>
+            <button onclick="topUp()">💸 Top Up</button>
+        </div>
+
+        <!-- Card 4: Transfer -->
+        <div class="card">
+            <h3>📤 Transfer Uang</h3>
+            <div class="form-group">
+                <label>Email Tujuan</label>
+                <input type="email" id="transferEmail" placeholder="Email penerima">
+            </div>
+            <div class="form-group">
+                <label>Nominal (Rp)</label>
+                <input type="number" id="transferAmount" placeholder="Masukkan nominal" min="1000" step="1000">
+            </div>
+            <button onclick="transfer()">🚀 Transfer</button>
+        </div>
+
+        <!-- Card 5: Riwayat Transaksi (Full width) -->
+        <div class="card full-width">
+            <h3>📜 Riwayat Transaksi</h3>
+            <div id="transactionList" class="transaction-list">
+                <p style="text-align:center; color:#888;">Belum ada transaksi</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_URL = "http://localhost:3000/api/v1";
+const token = localStorage.getItem("token");
+
+if (!token) {
+    window.location.href = "/index.html";
+}
+
+// Decode JWT
+function decodeJWT(t) {
+    try {
+        const base64Payload = t.split('.')[1];
+        const payload = JSON.parse(atob(base64Payload));
+        return payload;
+    } catch(e) {
+        return null;
+    }
+}
+
+// Format Rupiah
+function formatRupiah(amount) {
+    return new Intl.NumberFormat('id-ID').format(amount);
+}
+
+// Format Tanggal
+function formatDate(timestamp) {
+    if (!timestamp) return '-';
+    const date = new Date(timestamp);
+    return date.toLocaleString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Tampilkan Pesan
+function showMessage(msg, isError = false) {
+    const msgDiv = document.getElementById('message');
+    msgDiv.textContent = msg;
+    msgDiv.className = isError ? 'message error' : 'message success';
+    msgDiv.classList.remove('hidden');
+    setTimeout(() => {
+        msgDiv.classList.add('hidden');
+    }, 3000);
+}
+
+// Tampilkan JWT Info
+function displayJWTInfo() {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    document.getElementById('jwtToken').textContent = token;
+    document.getElementById('username').textContent = user.username || '-';
+    document.getElementById('email').textContent = user.email || '-';
+    
+    const payload = decodeJWT(token);
+    if (payload) {
+        const expDate = new Date(payload.exp * 1000);
+        document.getElementById('jwtPayload').innerHTML = `
+            📋 <strong>Payload:</strong><br>
+            🆔 ID: ${payload.id}<br>
+            📧 Email: ${payload.email}<br>
+            ⏰ Expired: ${expDate.toLocaleString('id-ID')}
+        `;
+    }
+}
+
+// Refresh Balance
+async function refreshBalance() {
+    try {
+        const response = await fetch(API_URL + "/wallet/balance", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await response.json();
+        
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "/index.html";
+            return;
+        }
+        
+        if (data.success) {
+            document.getElementById('balance').textContent = formatRupiah(data.data.balance);
+            displayTransactions(data.data.transactions || []);
+        } else {
+            showMessage(data.message, true);
+        }
+    } catch (error) {
+        showMessage("Error: " + error.message, true);
+    }
+}
+
+// Display Transactions
+function displayTransactions(transactions) {
+    const container = document.getElementById('transactionList');
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (!transactions || transactions.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#888;">📭 Belum ada transaksi</p>';
+        return;
+    }
+    
+    container.innerHTML = transactions.map(t => {
+        const isCredit = t.to_user_id === currentUser.id || t.type === 'TOPUP';
+        const amountFormatted = formatRupiah(t.amount);
+        const typeText = t.type === 'TOPUP' ? '💰 Top Up' : (isCredit ? '📥 Transfer Masuk' : '📤 Transfer Keluar');
+        
+        return `
+            <div class="transaction-item ${isCredit ? 'credit' : 'debit'}">
+                <div>
+                    <strong>${typeText}</strong>
+                    <div class="transaction-date">${formatDate(t.timestamp)}</div>
+                </div>
+                <div style="font-weight: bold;">
+                    ${isCredit ? '+' : '-'} Rp ${amountFormatted}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Top Up
+async function topUp() {
+    const amount = parseInt(document.getElementById('topupAmount').value);
+    
+    if (!amount || amount <= 0) {
+        showMessage("Nominal harus lebih dari 0", true);
+        return;
+    }
+    
+    try {
+        const response = await fetch(API_URL + "/wallet/topup", {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ amount: amount })
+        });
+        const data = await response.json();
+        
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "/index.html";
+            return;
+        }
+        
+        if (data.success) {
+            showMessage(`✅ Top up Rp ${formatRupiah(amount)} berhasil!`, false);
+            document.getElementById('topupAmount').value = '';
+            refreshBalance();
+        } else {
+            showMessage(data.message, true);
+        }
+    } catch (error) {
+        showMessage("Error: " + error.message, true);
+    }
+}
+
+// Transfer
+async function transfer() {
+    const target_email = document.getElementById('transferEmail').value;
+    const amount = parseInt(document.getElementById('transferAmount').value);
+    
+    if (!target_email) {
+        showMessage("Email tujuan harus diisi", true);
+        return;
+    }
+    if (!amount || amount <= 0) {
+        showMessage("Nominal harus lebih dari 0", true);
+        return;
+    }
+    
+    try {
+        const response = await fetch(API_URL + "/wallet/transfer", {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ target_email: target_email, amount: amount })
+        });
+        const data = await response.json();
+        
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "/index.html";
+            return;
+        }
+        
+        if (data.success) {
+            showMessage(`✅ Transfer Rp ${formatRupiah(amount)} ke ${target_email} berhasil!`, false);
+            document.getElementById('transferEmail').value = '';
+            document.getElementById('transferAmount').value = '';
+            refreshBalance();
+        } else {
+            showMessage(data.message, true);
+        }
+    } catch (error) {
+        showMessage("Error: " + error.message, true);
+    }
+}
+
+// Logout
+function logout() {
+    localStorage.clear();
+    window.location.href = "/index.html";
+}
+
+// Inisialisasi
+displayJWTInfo();
+refreshBalance();
+</script>
+</body>
+</html>
