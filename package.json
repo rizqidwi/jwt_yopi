@@ -1,0 +1,30 @@
+{
+  "name": "nodejs-mini-wallet",
+  "version": "1.0.0",
+  "description": "Mini Wallet App with JWT Dashboard & Logging",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "wallet",
+    "jwt",
+    "express",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.1",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
