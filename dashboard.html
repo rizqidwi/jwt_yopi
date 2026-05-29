@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        .success-message {
+            color: #38a169;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .transaction-list {
+            list-style: none;
+        }
+
+        .transaction-item {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-type {
+            font-weight: bold;
+        }
+
+        .topup {
+            color: #38a169;
+        }
+
+        .transfer-out {
+            color: #e53e3e;
+        }
+
+        .transfer-in {
+            color: #38a169;
+        }
+
+        .transaction-amount {
+            font-weight: bold;
+        }
+
+        .transaction-date {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .jwt-payload {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .jwt-token {
+            font-family: monospace;
+            word-break: break-all;
+            font-size: 12px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        h4 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>💰 Mini Wallet</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="card balance-card">
+            <h2>Welcome, <span id="username"></span>!</h2>
+            <p>Email: <span id="email"></span></p>
+            <div class="balance-amount">
+                Balance: $<span id="balance">0</span>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>💰 Top Up Wallet</h3>
+                <div class="form-group">
+                    <label>Amount ($)</label>
+                    <input type="number" id="topupAmount" placeholder="Enter amount" min="1" step="1">
+                </div>
+                <button onclick="handleTopup()">Top Up</button>
+                <div id="topupMessage"></div>
+            </div>
+
+            <div class="card">
+                <h3>💸 Transfer Money</h3>
+                <div class="form-group">
+                    <label>Target Email</label>
+                    <input type="email" id="transferEmail" placeholder="recipient@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Amount ($)</label>
+                    <input type="number" id="transferAmount" placeholder="Enter amount" min="1" step="1">
+                </div>
+                <button onclick="handleTransfer()">Transfer</button>
+                <div id="transferMessage"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📜 Transaction History</h3>
+            <div id="transactionHistory">
+                <p style="color: #888; text-align: center;">Loading transactions...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>🔐 JWT Inspector</h3>
+            <div id="jwtInfo">
+                <p style="color: #888;">Loading token info...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api/v1';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/';
+        }
+        
+        const user = JSON.parse(localStorage.getItem('user'));
+        document.getElementById('username').textContent = user.username;
+        document.getElementById('email').textContent = user.email;
+        
+        async function loadDashboard() {
+            await loadBalance();
+            displayJWTInfo();
+        }
+        
+        async function loadBalance() {
+            try {
+                const response = await fetch(`${API_URL}/wallet/balance`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('balance').textContent = data.data.balance;
+                    displayTransactions(data.data.transactions);
+                } else if (data.message === 'Invalid token' || data.message === 'Token has expired') {
+                    logout();
+                }
+            } catch (error) {
+                console.error('Error loading balance:', error);
+            }
+        }
+        
+        function displayTransactions(transactions) {
+            const historyDiv = document.getElementById('transactionHistory');
+            
+            if (!transactions || transactions.length === 0) {
+                historyDiv.innerHTML = '<p style="color: #888; text-align: center;">No transactions yet</p>';
+                return;
+            }
+            
+            historyDiv.innerHTML = `
+                <ul class="transaction-list">
+                    ${transactions.map(t => {
+                        let transactionClass = '';
+                        let transactionText = '';
+                        
+                        if (t.type === 'TOPUP') {
+                            transactionClass = 'topup';
+                            transactionText = `+ $${t.amount}`;
+                        } else if (t.type === 'TRANSFER') {
+                            if (t.from_email === user.email) {
+                                transactionClass = 'transfer-out';
+                                transactionText = `- $${t.amount} to ${t.to_email}`;
+                            } else {
+                                transactionClass = 'transfer-in';
+                                transactionText = `+ $${t.amount} from ${t.from_email}`;
+                            }
+                        }
+                        
+                        return `
+                            <li class="transaction-item">
+                                <div>
+                                    <span class="transaction-type">${t.type}</span>
+                                    <div class="transaction-date">${new Date(t.timestamp).toLocaleString()}</div>
+                                </div>
+                                <span class="transaction-amount ${transactionClass}">${transactionText}</span>
+                            </li>
+                        `;
+                    }).join('')}
+                </ul>
+            `;
+        }
+        
+        async function handleTopup() {
+            const amount = document.getElementById('topupAmount').value;
+            const messageDiv = document.getElementById('topupMessage');
+            
+            if (!amount || amount <= 0) {
+                messageDiv.className = 'error-message';
+                messageDiv.textContent = 'Please enter a valid amount (greater than 0)';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/wallet/topup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ amount: parseFloat(amount) })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageDiv.className = 'success-message';
+                    messageDiv.textContent = `✅ Top up successful! New balance: $${data.data.new_balance}`;
+                    document.getElementById('topupAmount').value = '';
+                    await loadBalance();
+                    setTimeout(() => messageDiv.textContent = '', 3000);
+                } else {
+                    messageDiv.className = 'error-message';
+                    messageDiv.textContent = `❌ ${data.message}`;
+                }
+            } catch (error) {
+                messageDiv.className = 'error-message';
+                messageDiv.textContent = 'An error occurred. Please try again.';
+            }
+        }
+        
+        async function handleTransfer() {
+            const target_email = document.getElementById('transferEmail').value;
+            const amount = document.getElementById('transferAmount').value;
+            const messageDiv = document.getElementById('transferMessage');
+            
+            if (!target_email) {
+                messageDiv.className = 'error-message';
+                messageDiv.textContent = 'Please enter target email';
+                return;
+            }
+            
+            if (!amount || amount <= 0) {
+                messageDiv.className = 'error-message';
+                messageDiv.textContent = 'Please enter a valid amount (greater than 0)';
+                return;
+            }
+            
+            if (target_email === user.email) {
+                messageDiv.className = 'error-message';
+                messageDiv.textContent = 'You cannot transfer to yourself';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/wallet/transfer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        target_email: target_email, 
+                        amount: parseFloat(amount) 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageDiv.className = 'success-message';
+                    messageDiv.textContent = `✅ Transfer successful! New balance: $${data.data.from_balance}`;
+                    document.getElementById('transferEmail').value = '';
+                    document.getElementById('transferAmount').value = '';
+                    await loadBalance();
+                    setTimeout(()
